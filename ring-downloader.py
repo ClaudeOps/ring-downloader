@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from ring_doorbell import Ring
 import os
 import pytz
