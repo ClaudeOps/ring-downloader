@@ -20,7 +20,8 @@ jobs:
     - name: Lint with pycodestyle
       run: |
         pip install pycodestyle
-        pycodestyle --show-source --show-pep8 --ignore=errors /github/workspace/
+        ls -lR
+        #pycodestyle --show-source --show-pep8 --ignore=errors /github/workspace/
     - name: Lint with flake8
       run: |
         pip install flake8
