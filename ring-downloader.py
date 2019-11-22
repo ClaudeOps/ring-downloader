@@ -10,6 +10,7 @@ CONFIG_DIR = os.path.expandvars("$HOME/.ringdl/")
 CONFIG_FILE = f'{CONFIG_DIR}/config.ini'
 PICKLE_FILE = f'{CONFIG_DIR}/ring-events.pickle'
 
+
 def download(doorbell, event):
     eventId = event.get('id')
     if eventId in downloaded_events:
@@ -26,7 +27,7 @@ def download(doorbell, event):
         if status == 'ready':
             try:
                 doorbell.recording_download(eventId, filename=filename)
-                os.utime(filename,(eventTime.timestamp(),eventTime.timestamp()))
+                os.utime(filename, (eventTime.timestamp(), eventTime.timestamp()))
                 return True
             except Exception as ex:
                 print(ex)
@@ -59,7 +60,7 @@ for doorbell in myring.doorbells:
         print(f'Could not find time zone {timezone}. Setting to default timezone.')
         timezone = None
     for event in doorbell.history(limit=30, retry=10, timezone=timezone):
-        count +=1
+        count += 1
         if event.get('id') not in downloaded_events:
             if download(doorbell, event):
                 downloaded_events.append(event.get("id"))
@@ -78,7 +79,7 @@ for doorbell in myring.doorbells:
         # output += '\n'
 
     print(f'{doorbot} videos downloaded: {dlcount} out of {count}')
-    
-#print(output)
+
+#  print(output)
 with open(PICKLE_FILE, 'wb') as handle:
     pickle.dump(downloaded_events, handle)
