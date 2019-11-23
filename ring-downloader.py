@@ -18,7 +18,9 @@ def download(doorbell, event):
     else:
         doorbot = doorbell.name
         eventTime = event.get('created_at')
-        filename = f'{downloadFolder}/{doorbot}-{eventTime.strftime("%Y%m%d_%H%M%S")}-{eventId}.mp4'
+        filename = f'{downloadFolder}/'
+        filename += f'{doorbot}-{eventTime.strftime("%Y%m%d_%H%M%S")}-'
+        filename += f'{eventId}.mp4'
         filename = filename.replace(' ', '_')
 
         print(filename)
@@ -49,7 +51,7 @@ downloadFolder = config['DEFAULT']['video_directory']
 try:
     with open(PICKLE_FILE, 'rb') as handle:
         downloaded_events = pickle.loads(handle.read())
-except:
+except Exception as exc:
     print(f'Error opening pickle file')
     downloaded_events = []
 
@@ -62,7 +64,7 @@ for doorbell in myring.doorbells:
     if timezone not in pytz.all_timezones:
         print(
             f'Could not find time zone {timezone}. ',
-              'Setting to default timezone.'
+            'Setting to default timezone.'
         )
         timezone = None
     for event in doorbell.history(limit=30, retry=10, timezone=timezone):
