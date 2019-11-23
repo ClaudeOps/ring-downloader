@@ -4,7 +4,6 @@ from ring_doorbell import Ring
 import os
 import pytz
 import pickle
-import datetime
 import configparser
 CONFIG_DIR = os.path.expandvars("$HOME/.ringdl/")
 CONFIG_FILE = f'{CONFIG_DIR}/config.ini'
@@ -53,6 +52,7 @@ try:
         downloaded_events = pickle.loads(handle.read())
 except Exception as exc:
     print(f'Error opening pickle file')
+    print(f'{exc}')
     downloaded_events = []
 
 # output = ''
