@@ -27,7 +27,9 @@ def download(doorbell, event):
         if status == 'ready':
             try:
                 doorbell.recording_download(eventId, filename=filename)
-                os.utime(filename, (eventTime.timestamp(), eventTime.timestamp()))
+                os.utime(filename, 
+                         (eventTime.timestamp(), eventTime.timestamp())
+                        )
                 return True
             except Exception as ex:
                 print(ex)
