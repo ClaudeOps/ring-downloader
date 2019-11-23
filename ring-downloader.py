@@ -27,8 +27,9 @@ def download(doorbell, event):
         if status == 'ready':
             try:
                 doorbell.recording_download(eventId, filename=filename)
-                os.utime(filename,
-                         (eventTime.timestamp(), eventTime.timestamp())
+                os.utime(
+                    filename,
+                    (eventTime.timestamp(), eventTime.timestamp())
                 )
                 return True
             except Exception as ex:
@@ -59,8 +60,10 @@ for doorbell in myring.doorbells:
     doorbot = doorbell.name
     timezone = doorbell.timezone
     if timezone not in pytz.all_timezones:
-        print(f'Could not find time zone {timezone}. ',
-              'Setting to default timezone.')
+        print(
+            f'Could not find time zone {timezone}. ',
+              'Setting to default timezone.'
+        )
         timezone = None
     for event in doorbell.history(limit=30, retry=10, timezone=timezone):
         count += 1
