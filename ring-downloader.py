@@ -76,8 +76,9 @@ downloadFolder = config['DEFAULT']['video_directory']
 try:
     with open(PICKLE_FILE, 'rb') as handle:
         downloaded_events = pickle.loads(handle.read())
-except:
+except Exception as ex:
     print(f'Error opening pickle file')
+    print(ex)
     downloaded_events = []
 
 devices = myring.devices()
