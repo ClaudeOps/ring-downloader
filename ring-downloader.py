@@ -58,16 +58,16 @@ def otp_callback():
 config = configparser.ConfigParser()
 config.read(CONFIG_FILE)
 
-# if cache_file.is_file():
-#     auth = Auth(json.loads(cache_file.read_text()), token_updated)
-# else:
-username = config['DEFAULT']['user_name']
-password = config['DEFAULT']['password']
-auth = Auth("RDL/0.1", None, token_updated)
-try:
-    auth.fetch_token(username, password)
-except MissingTokenError:
-    auth.fetch_token(username, password, otp_callback())
+if cache_file.is_file():
+    auth = Auth("RDL/0.1", json.loads(cache_file.read_text()), token_updated)
+else:
+    username = config['DEFAULT']['user_name']
+    password = config['DEFAULT']['password']
+    auth = Auth("RDL/0.1", None, token_updated)
+    try:
+        auth.fetch_token(username, password)
+    except MissingTokenError:
+        auth.fetch_token(username, password, otp_callback())
 
 myring = Ring(auth)
 myring.update_data()
