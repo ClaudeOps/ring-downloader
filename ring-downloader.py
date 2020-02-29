@@ -5,7 +5,7 @@ Download doorbell videos from you Ring account.
 NOTE: Currently Ring.com does not provide an official API so
       this code can break without warning.
 
-Thanks to tchellomello for his python-ring-doorbell module 
+Thanks to tchellomello for his python-ring-doorbell module
 found here: https://github.com/tchellomello/python-ring-doorbell
 """
 
