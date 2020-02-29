@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
+"""
+ring-downloader
+Download doorbell videos from you Ring account.
+NOTE: Currently Ring.com does not provide an official API so
+      this code can break without warning.
+
+Thanks to tchellomello for his python-ring-doorbell module 
+found here: https://github.com/tchellomello/python-ring-doorbell
+"""
 
 import configparser
 import json
 import os
 import pickle
 from pathlib import Path
-import sys
+
 import pytz
 from oauthlib.oauth2 import MissingTokenError
 from ring_doorbell import Ring, Auth
@@ -23,6 +32,11 @@ PASSWORD = CONFIG["DEFAULT"]["password"]
 
 
 def download(bell, evnt):
+    """
+        Download the current event from the given doorbell.
+        If the video is already in the download history or
+        successfully downloaded then return True otherwise False.
+    """
     event_id = evnt.get("id")
     if event_id in downloaded_events:
         return True
@@ -48,7 +62,7 @@ def download(bell, evnt):
                 filename, (event_time.timestamp(), event_time.timestamp())
             )
             return True
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             print(ex)
             return False
     else:
@@ -80,18 +94,18 @@ else:
     except MissingTokenError:
         AUTH.fetch_token(USERNAME, PASSWORD, otp_callback())
 
-myring = Ring(AUTH)
+myring = Ring(AUTH)  # pylint: disable=invalid-name
 myring.update_data()
 
 try:
     with open(PICKLE_FILE, "rb") as handle:
         downloaded_events = pickle.loads(handle.read())
 except FileNotFoundError:
-    print(f"Download history file missing. No problem. We'll create a new one when we're finished.")
+    print(
+        "Download history file missing. No problem. ",
+        "We'll create a new one when we're finished.",
+    )
     downloaded_events = []
-except BaseException:
-    print("Something went wrong opening the download history file.")
-    sys.exit(1)
 
 DEVICES = myring.devices()
 for doorbell in DEVICES["doorbots"]:
