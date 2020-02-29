@@ -1,53 +1,53 @@
 #!/usr/bin/env python3
 
-import json
-from pathlib import Path
-from pprint import pprint
-
-from ring_doorbell import Ring, Auth
-from oauthlib.oauth2 import MissingTokenError
-import datetime
-
-import os
-import pytz
-import pickle
 import configparser
+import json
+import os
+import pickle
+from pathlib import Path
+import pytz
+from oauthlib.oauth2 import MissingTokenError
+from ring_doorbell import Ring, Auth
+
 CONFIG_DIR = os.path.expandvars("$HOME/.ringdl/")
 CONFIG_FILE = f'{CONFIG_DIR}/config.ini'
 PICKLE_FILE = f'{CONFIG_DIR}/ring-events.pickle'
-
+CACHE_FILE = Path('token.cache')
 
 def download(doorbell, event):
     eventId = event.get('id')
     if eventId in downloaded_events:
         return True
-    else:
-        doorbot = doorbell.name
-        eventTime = event.get('created_at')
-        filename = f'{downloadFolder}/{doorbot}-{eventTime.strftime("%Y%m%d_%H%M%S")}-{eventId}.mp4'
-        filename = filename.replace(' ', '_')
 
-        print(filename)
-        status = event.get('recording', {}).get('status')
+    doorbot = doorbell.name
+    eventTime = event.get('created_at')
+    filename = ''.join((f'{downloadFolder}/',
+                        f'{doorbot}-',
+                        f'{eventTime.strftime("%Y%m%d_%H%M%S")}-',
+                        f'{eventId}.mp4'))
+    filename = filename.replace(' ', '_')
 
-        if status == 'ready':
-            try:
-                doorbell.recording_download(eventId, filename=filename)
-                os.utime(filename, (eventTime.timestamp(), eventTime.timestamp()))
-                return True
-            except Exception as ex:
-                print(ex)
-                return False
-        else:
-            print(f'Event: {eventId} is {status}')
+    print(filename)
+    status = event.get('recording', {}).get('status')
+
+    if status == 'ready':
+        try:
+            doorbell.recording_download(eventId, filename=filename)
+            os.utime(
+                filename,
+                (eventTime.timestamp(), eventTime.timestamp())
+                )
+            return True
+        except Exception as ex:
+            print(ex)
             return False
-
-
-cache_file = Path('token.cache')
+    else:
+        print(f'Event: {eventId} is {status}')
+        return False
 
 
 def token_updated(token):
-    cache_file.write_text(json.dumps(token))
+    CACHE_FILE.write_text(json.dumps(token))
 
 
 def otp_callback():
@@ -58,16 +58,16 @@ def otp_callback():
 config = configparser.ConfigParser()
 config.read(CONFIG_FILE)
 
-if cache_file.is_file():
-    auth = Auth("RDL/0.1", json.loads(cache_file.read_text()), token_updated)
+if CACHE_FILE.is_file():
+    auth = Auth("RDL/0.1", json.loads(CACHE_FILE.read_text()), token_updated)
 else:
-    username = config['DEFAULT']['user_name']
-    password = config['DEFAULT']['password']
+    USERNAME = config['DEFAULT']['user_name']
+    PASSWORD = config['DEFAULT']['password']
     auth = Auth("RDL/0.1", None, token_updated)
     try:
-        auth.fetch_token(username, password)
+        auth.fetch_token(USERNAME, PASSWORD)
     except MissingTokenError:
-        auth.fetch_token(username, password, otp_callback())
+        auth.fetch_token(USERNAME, PASSWORD, otp_callback())
 
 myring = Ring(auth)
 myring.update_data()
@@ -90,7 +90,10 @@ for doorbell in devices['doorbots']:
     doorbot = doorbell.name
     timezone = doorbell.timezone
     if timezone not in pytz.all_timezones:
-        print(f'Could not find time zone {timezone}. Setting to default timezone.')
+        print(
+            f'Could not find time zone {timezone}. ',
+            'Setting to default timezone.'
+        )
         timezone = None
     for event in doorbell.history(limit=300, retry=10, timezone=timezone):
         count += 1
