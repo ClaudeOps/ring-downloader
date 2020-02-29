@@ -14,6 +14,7 @@ CONFIG_FILE = f'{CONFIG_DIR}/config.ini'
 PICKLE_FILE = f'{CONFIG_DIR}/ring-events.pickle'
 CACHE_FILE = Path('token.cache')
 
+
 def download(doorbell, event):
     eventId = event.get('id')
     if eventId in downloaded_events:
@@ -36,7 +37,7 @@ def download(doorbell, event):
             os.utime(
                 filename,
                 (eventTime.timestamp(), eventTime.timestamp())
-                )
+            )
             return True
         except Exception as ex:
             print(ex)
