@@ -29,7 +29,3 @@ jobs:
       run: |
         # currently testing so always exit zero here
         pylint --exit-zero --reports=y ring-downloader.py
-#    - name: Test with pytest
-#      run: |
-#        pip install pytest
-#        pytest
