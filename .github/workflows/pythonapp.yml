@@ -32,7 +32,7 @@ jobs:
         pwd
         ls
         # currently testing so always exit zero here
-        pylint --exit-zero --reports=y ring_downloader.py
+        pylint --exit-zero --reports=y ring-downloader.py
 #    - name: Test with pytest
 #      run: |
 #        pip install pytest
