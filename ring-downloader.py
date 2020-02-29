@@ -9,10 +9,10 @@ import pytz
 from oauthlib.oauth2 import MissingTokenError
 from ring_doorbell import Ring, Auth
 
-CONFIG_DIR = os.path.expandvars("$HOME/.ringdl/")
+CONFIG_DIR = os.path.expandvars("$HOME/.config/ringdl/")
 CONFIG_FILE = f'{CONFIG_DIR}/config.ini'
 PICKLE_FILE = f'{CONFIG_DIR}/ring-events.pickle'
-CACHE_FILE = Path('token.cache')
+CACHE_FILE = Path(f'{CONFIG_DIR}/token.cache')
 
 
 def download(doorbell, event):
