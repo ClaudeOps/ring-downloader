@@ -27,8 +27,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name:  Lint with pylint
       run: |
-        # currently testing so alway exit zero here
-        pylint --exit-zero .
+        # currently testing so always exit zero here
+        pylint --exit-zero --reports=y ring_downloader.py
 #    - name: Test with pytest
 #      run: |
 #        pip install pytest
