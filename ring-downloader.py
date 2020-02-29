@@ -132,6 +132,7 @@ for doorbell in DEVICES["doorbots"]:
             dlStatus = "Skipping previous download"
 
     print(f"{doorbot} videos downloaded: {dlcount} out of {count}")
-
+# don't let the pickle file grow too big. clean out some entries.
+downloaded_events.sort(reverse=True)
 with open(PICKLE_FILE, "wb") as handle:
-    pickle.dump(downloaded_events, handle)
+    pickle.dump(downloaded_events[0:1000], handle)
