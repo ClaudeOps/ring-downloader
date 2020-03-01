@@ -38,8 +38,6 @@ def download(bell, evnt):
         successfully downloaded then return True otherwise False.
     """
     event_id = evnt.get("id")
-    if event_id in downloaded_events:
-        return True
 
     event_time = evnt.get("created_at")
     filename = "".join(
@@ -85,54 +83,67 @@ def otp_callback():
     return auth_code
 
 
-if CACHE_FILE.is_file():
-    AUTH = Auth("RDL/0.1", json.loads(CACHE_FILE.read_text()), token_updated)
-else:
-    AUTH = Auth("RDL/0.1", None, token_updated)
-    try:
-        AUTH.fetch_token(USERNAME, PASSWORD)
-    except MissingTokenError:
-        AUTH.fetch_token(USERNAME, PASSWORD, otp_callback())
-
-myring = Ring(AUTH)  # pylint: disable=invalid-name
-myring.update_data()
-
-try:
-    with open(PICKLE_FILE, "rb") as handle:
-        downloaded_events = pickle.loads(handle.read())
-except FileNotFoundError:
-    print(
-        "Download history file missing. No problem. ",
-        "We'll create a new one when we're finished.",
-    )
-    downloaded_events = []
-
-DEVICES = myring.devices()
-for doorbell in DEVICES["doorbots"]:
-    dlcount = 0
-    count = 0
-    doorbot = doorbell.name
-    timezone = doorbell.timezone
-    if timezone not in pytz.all_timezones:
-        print(
-            f"Could not find time zone {timezone}. ",
-            "Setting to default timezone.",
+def main():
+    """ Main function """
+    if CACHE_FILE.is_file():
+        auth = Auth(
+            "RDL/0.1", json.loads(CACHE_FILE.read_text()), token_updated
         )
-        timezone = None
-    for event in doorbell.history(limit=100, retry=10, timezone=timezone):
-        count += 1
-        if event.get("id") not in downloaded_events:
-            if download(doorbell, event):
-                downloaded_events.append(event.get("id"))
-                dlStatus = "Successful"
-                dlcount += 1
-            else:
-                dlStatus = "Failed"
-        else:
-            dlStatus = "Skipping previous download"
+    else:
+        auth = Auth("RDL/0.1", None, token_updated)
+        try:
+            auth.fetch_token(USERNAME, PASSWORD)
+        except MissingTokenError:
+            auth.fetch_token(USERNAME, PASSWORD, otp_callback())
 
-    print(f"{doorbot} videos downloaded: {dlcount} out of {count}")
-# don't let the pickle file grow too big. clean out some entries.
-downloaded_events.sort(reverse=True)
-with open(PICKLE_FILE, "wb") as handle:
-    pickle.dump(downloaded_events[0:1000], handle)
+    myring = Ring(auth)
+    myring.update_data()
+
+    try:
+        with open(PICKLE_FILE, "rb") as handle:
+            download_history = pickle.loads(handle.read())
+    except FileNotFoundError:
+        print(
+            "Download history file missing. No problem. ",
+            "We'll create a new one when we're finished.",
+        )
+        download_history = []
+
+    devices = myring.devices()
+    for doorbell in devices["doorbots"]:
+        dlcount = 0
+        count = 0
+        doorbot = doorbell.name
+        timezone = doorbell.timezone
+        if timezone not in pytz.all_timezones:
+            print(
+                f"Could not find time zone {timezone}. ",
+                "Setting to default timezone.",
+            )
+            timezone = None
+        for current_event in doorbell.history(
+                limit=100, retry=10, timezone=timezone
+        ):
+            count += 1
+            if current_event.get("id") not in download_history:
+                if download(doorbell, current_event):
+                    download_history.append(current_event.get("id"))
+                    # dl_status = "Successful"
+                    dlcount += 1
+                else:
+                    # dl_status = "Failed"
+                    pass
+            else:
+                # dl_status = "Skipping previous download"
+                pass
+            # print(f"{current_event.get("id")}: {dl_status}")
+        print(f"{doorbot} videos downloaded: {dlcount} out of {count}")
+
+    # don't let the pickle file grow too big. clean out some entries.
+    download_history.sort(reverse=True)
+    with open(PICKLE_FILE, "wb") as handle:
+        pickle.dump(download_history[0:1000], handle)
+
+
+if __name__ == "__main__":
+    main()
