@@ -136,7 +136,7 @@ def main():
             else:
                 # dl_status = "Skipping previous download"
                 pass
-            # print(f"{current_event.get("id")}: {dl_status}")
+            # print(f"{current_event.get('id')}: {dl_status}")
         print(f"{doorbot} videos downloaded: {dlcount} out of {count}")
 
     # don't let the pickle file grow too big. clean out some entries.
