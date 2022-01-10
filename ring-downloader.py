@@ -122,7 +122,7 @@ def main():
             )
             timezone = None
         for current_event in doorbell.history(
-                limit=100, retry=10, timezone=timezone
+                limit=200, retry=10, timezone=timezone
         ):
             count += 1
             if current_event.get("id") not in download_history:
